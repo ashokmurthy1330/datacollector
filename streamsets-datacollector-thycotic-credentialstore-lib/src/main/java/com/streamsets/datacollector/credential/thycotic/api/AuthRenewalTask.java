@@ -1,23 +1,23 @@
 /*
- * Copyright 2018 StreamSets Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
+ * Copyright 2019 StreamSets Inc.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.streamsets.datacollector.credential.thycotic.api;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -36,11 +36,9 @@ public class AuthRenewalTask {
   private static final String GRANT_TYPE = "password";
   private volatile String accessToken;
   private volatile long expires;
-  private long authExpiresIn;
-  private Map<String, String> map;
-  private String secretServerUrl = "";
-  private String username = "";
-  private String password = "";
+  private String secretServerUrl;
+  private String username;
+  private String password;
   private CloseableHttpClient httpclient;
 
   public AuthRenewalTask(CloseableHttpClient httpclient, String secretServerUrl, String username,
@@ -68,22 +66,20 @@ public class AuthRenewalTask {
       try {
         synchronized (this) {
           if (System.currentTimeMillis() > expires) {
-            map = fetchAccessToken();
-            if (map != null && !map.isEmpty()) {
-              accessToken = map.get("access_token");
-              expires = (System.currentTimeMillis() + authExpiresIn);
+            accessToken = fetchAccessToken();
+            if (accessToken != null && !accessToken.isEmpty()) {
+              expires = (System.currentTimeMillis() + expires);
             }
           }
         }
       } catch (Exception e) {
-        LOG.debug("Error in fetcing the access token: " + e);
+        LOG.debug("Error in fetching the access token: {} ", e);
       }
     }
     return accessToken;
   }
 
-  private Map<String, String> fetchAccessToken() throws Exception {
-    Map<String, String> accessToken = new HashMap<String, String>();
+  private String fetchAccessToken() throws Exception {
     HttpPost httpPost = new HttpPost(secretServerUrl + "/oauth2/token");
     List<NameValuePair> nvps = new ArrayList<NameValuePair>();
     nvps.add(new BasicNameValuePair("username", username));
@@ -104,12 +100,10 @@ public class AuthRenewalTask {
           throw new Exception(
               "Error authenticating. Ensure username / password are correct and web services are enabled");
         }
-        String token = (String) obj.get("access_token");
-        authExpiresIn = (Long) obj.get("expires_in");
-        LOG.debug("Auth Bearer Token :" + token);
-        accessToken.put("access_token", token);
+        accessToken = (String) obj.get("access_token");
+        expires = (Long) obj.get("expires_in");
+        LOG.debug("Auth Bearer Token {}:", accessToken);
         return accessToken;
-
       }
     } finally {
       response2.close();

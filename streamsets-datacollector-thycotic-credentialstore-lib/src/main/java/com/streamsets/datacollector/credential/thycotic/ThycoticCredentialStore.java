@@ -1,15 +1,17 @@
 /*
- * Copyright 2018 StreamSets Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
+ * Copyright 2019 StreamSets Inc.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.streamsets.datacollector.credential.thycotic;
@@ -24,6 +26,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
@@ -52,7 +55,8 @@ public class ThycoticCredentialStore implements CredentialStore {
 
   @VisibleForTesting
   protected static final String DELIMITER_FOR_CACHE_KEY = "\n";
-  public static final String FIELD_KEY_SEPARATOR_DEFAULT = "&";
+  public static final String FIELD_KEY_SEPARATOR_PROP = "nameSeparator";
+  public static final String FIELD_KEY_SEPARATOR_DEFAULT = "-";
 
   public static final String CACHE_EXPIRATION_PROP = "cache.inactivityExpiration.seconds";
   public static final long CACHE_EXPIRATION_DEFAULT = TimeUnit.SECONDS.toSeconds(1800);
@@ -69,12 +73,21 @@ public class ThycoticCredentialStore implements CredentialStore {
 
   public static final String REFRESH_OPTION = "refresh";
   public static final String RETRY_OPTION = "retry";
-  private static final String OPTION_URL = "url";
+
+  private static final String OPEN_TIMEOUT = "open.timeout";
+  private static final String READ_TIMEOUT = "read.timeout";
+  private static final String SSL_ENABLED_PROTOCOLS = "ssl.enabled.protocols";
+  private static final String SSL_TRUSTSTORE_FILE = "ssl.truststore.file";
+  private static final String SSL_TRUSTSTORE_PASSWORD = "ssl.truststore.password";
+  private static final String SSL_VERIFY = "ssl.verify";
+  private static final String SSL_TIMEOUT = "ssl.timeout";
+  private static final String TIMEOUT = "timeout";
 
   private ThycoticConfiguration config;
   private CloseableHttpClient httpclient;
   private GetThycoticSecrets secret;
   private AuthRenewalTask authRenewal;
+  private Configuration configuration;
   private Context context;
 
   private String secretServerUrl;
@@ -94,7 +107,7 @@ public class ThycoticCredentialStore implements CredentialStore {
     List<ConfigIssue> issues = new ArrayList<ConfigIssue>();
     secret = new GetThycoticSecrets();
     httpclient = HttpClients.createDefault();
-    Configuration configuration = getConfiguration();
+    configuration = getConfiguration();
     config = getConfig(configuration);
     new SslVerification(config);
 
@@ -102,14 +115,14 @@ public class ThycoticCredentialStore implements CredentialStore {
     username = context.getConfig(THYCOTIC_SECRET_SERVER_USERNAME);
     password = context.getConfig(THYCOTIC_SECRET_SERVER_PASSWORD);
 
-    if (secretServerUrl == null && secretServerUrl.isEmpty()) {
-      issues.add(context.createConfigIssue(Errors.THYCOTIC_0000, THYCOTIC_SECRET_SERVER_URL));
+    if (secretServerUrl == null || secretServerUrl.isEmpty()) {
+      issues.add(context.createConfigIssue(Errors.THYCOTIC_00, THYCOTIC_SECRET_SERVER_URL));
     }
-    if (username == null && username.isEmpty()) {
-      issues.add(context.createConfigIssue(Errors.THYCOTIC_0000, THYCOTIC_SECRET_SERVER_USERNAME));
+    if (username == null || username.isEmpty()) {
+      issues.add(context.createConfigIssue(Errors.THYCOTIC_00, THYCOTIC_SECRET_SERVER_USERNAME));
     }
-    if (password == null && password.isEmpty()) {
-      issues.add(context.createConfigIssue(Errors.THYCOTIC_0000, THYCOTIC_SECRET_SERVER_PASSWORD));
+    if (password == null || password.isEmpty()) {
+      issues.add(context.createConfigIssue(Errors.THYCOTIC_00, THYCOTIC_SECRET_SERVER_PASSWORD));
     }
 
     if (issues.isEmpty()) {
@@ -143,16 +156,18 @@ public class ThycoticCredentialStore implements CredentialStore {
 
   protected ThycoticConfiguration getConfig(Configuration configuration) {
     return ThycoticConfigurationBuilder.newThycoticConfiguration()
-        .withAddress(configuration.get("url", ThycoticConfigurationBuilder.DEFAULT_ADDRESS))
-        .withOpenTimeout(configuration.get("open.timeout", 0))
-        .withReadTimeout(configuration.get("read.timeout", 0))
+        .withAddress(configuration.get(THYCOTIC_SECRET_SERVER_URL,
+            ThycoticConfigurationBuilder.DEFAULT_ADDRESS))
+        .withOpenTimeout(configuration.get(OPEN_TIMEOUT, 0))
+        .withReadTimeout(configuration.get(READ_TIMEOUT, 0))
         .withSslOptions((SslOptionsBuilder.newSslOptions()
-            .withEnabledProtocols(configuration.get("  ", SslOptionsBuilder.DEFAULT_PROTOCOLS))
-            .withTrustStoreFile(configuration.get("ssl.truststore.file", ""))
-            .withTrustStorePassword(configuration.get("ssl.truststore.password", ""))
-            .withSslVerify(configuration.get("ssl.verify", true))
-            .withSslTimeout(configuration.get("ssl.timeout", 0)).build()))
-        .withTimeout(configuration.get("timeout", 0)).build();
+            .withEnabledProtocols(
+                configuration.get(SSL_ENABLED_PROTOCOLS, SslOptionsBuilder.DEFAULT_PROTOCOLS))
+            .withTrustStoreFile(configuration.get(SSL_TRUSTSTORE_FILE, ""))
+            .withTrustStorePassword(configuration.get(SSL_TRUSTSTORE_PASSWORD, ""))
+            .withSslVerify(configuration.get(SSL_VERIFY, true))
+            .withSslTimeout(configuration.get(SSL_TIMEOUT, 0)).build()))
+        .withTimeout(configuration.get(TIMEOUT, 0)).build();
 
   }
 
@@ -164,7 +179,7 @@ public class ThycoticCredentialStore implements CredentialStore {
       if (ex.getCause() instanceof StageException) {
         throw (StageException) ex.getCause();
       } else {
-        throw new StageException(Errors.THYCOTIC_0001, getContext().getId(), name, ex);
+        throw new StageException(Errors.THYCOTIC_01, getContext().getId(), name, ex);
       }
     }
   }
@@ -217,7 +232,7 @@ public class ThycoticCredentialStore implements CredentialStore {
   }
 
   protected String encode(String group, String name, String options) {
-    return group + DELIMITER_FOR_CACHE_KEY + name + DELIMITER_FOR_CACHE_KEY + options;
+    return Joiner.on(DELIMITER_FOR_CACHE_KEY).join(group, name, options);
   }
 
   public class ThycoticCredentialValue implements CredentialValue {
@@ -237,21 +252,14 @@ public class ThycoticCredentialStore implements CredentialStore {
       group = params[0];
       name = params[1];
 
-      String[] splits = name.split(FIELD_KEY_SEPARATOR_DEFAULT);
+      String[] splits =
+          name.split(configuration.get(FIELD_KEY_SEPARATOR_PROP, FIELD_KEY_SEPARATOR_DEFAULT));
       secretId = Integer.valueOf(splits[0]);
       secretField = splits[1];
 
       options = Splitter.on(",").omitEmptyStrings().trimResults().withKeyValueSeparator("=")
           .split(params[2]);
 
-      if (options.containsKey(OPTION_URL)) {
-        try {
-          secretServerUrl = options.get(OPTION_URL);
-        } catch (Exception ex) {
-          LOG.warn("Store '{}' credential '{}' invalid option '{}' value '{}'",
-              getContext().getId(), name, OPTION_URL, options.get(OPTION_URL));
-        }
-      }
       if (options.containsKey(REFRESH_OPTION)) {
         try {
           refreshSeconds = Long.parseLong(options.get(REFRESH_OPTION));
@@ -303,7 +311,7 @@ public class ThycoticCredentialStore implements CredentialStore {
           }
         }
       } else if (throwException) {
-        throw new StageException(Errors.THYCOTIC_0001, name, credentialRetry);
+        throw new StageException(Errors.THYCOTIC_01, name, credentialRetry);
       } else {
         LOG.debug("Store '{}' credential '{}' using cached value", getContext().getId(), name);
       }
@@ -314,7 +322,6 @@ public class ThycoticCredentialStore implements CredentialStore {
     public String toString() {
       return "ThycoticCredentialValue{" + "name='" + name + '\'' + ", options=" + options + '}';
     }
-
   }
 
   public Context getContext() {
@@ -332,5 +339,4 @@ public class ThycoticCredentialStore implements CredentialStore {
   protected long now() {
     return System.currentTimeMillis();
   }
-
 }

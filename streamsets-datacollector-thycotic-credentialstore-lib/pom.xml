@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2017 StreamSets Inc.
+    Copyright 2019 StreamSets Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -23,17 +23,17 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.streamsets</groupId>
-		<artifactId>streamsets-datacollector</artifactId>
+		<artifactId>streamsets-datacollector-stage-lib-parent</artifactId>
 		<version>3.8.0-SNAPSHOT</version>
+		<relativePath>../stage-lib-parent</relativePath>
 	</parent>
 	<groupId>com.streamsets</groupId>
 	<artifactId>streamsets-datacollector-thycotic-credentialstore-lib</artifactId>
 	<version>3.8.0-SNAPSHOT</version>
 	<name>StreamSets Data Collector Thycotic Credential Store Lib</name>
-	<url>http://maven.apache.org</url>
+	<description>StreamSets Data Collector Thycotic Credential Store Lib</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<datacollector-api.version>3.7.0-SNAPSHOT</datacollector-api.version>
 		<httpclient.version>4.5.2</httpclient.version>
 		<guava.version>18.0</guava.version>
 		<mockito.version>1.10.19</mockito.version>
@@ -95,14 +95,12 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-	<description>StreamSets Data CollectorThycotic Credential Store Lib</description>
 </project>
