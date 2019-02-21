@@ -28,6 +28,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.base.Strings;
 
@@ -43,8 +44,7 @@ public class SslVerification {
       try {
         transportBuilder.doNotValidateCertificate();
       } catch (GeneralSecurityException e) {
-        throw new ThycoticRuntimeException(
-            "Error disabling SSL certificate verification: " + e.toString(), e);
+        throw new ThycoticRuntimeException("Error disabling SSL certificate verification: " + e.toString(), e);
       }
     } else if (conf.getAddress().startsWith("https")) {
       transportBuilder.setSslSocketFactory(getSSLSocketFactory(conf.getSslOptions()));
@@ -57,11 +57,10 @@ public class SslVerification {
 
       SSLContext sslContext = SSLContext.getInstance(TLS);
 
-      TrustManager[] trustManagers = getTrustManagers(
-          Strings.isNullOrEmpty(sslOptions.getTrustStoreFile()) ? null : trustStore);
+      TrustManager[] trustManagers = getTrustManagers(Strings.isNullOrEmpty(sslOptions.getTrustStoreFile()) ? null :
+          trustStore);
       sslContext.init(getKeyManagers(trustStore, sslOptions), trustManagers, null);
-      sslContext.getDefaultSSLParameters()
-          .setProtocols(sslOptions.getEnabledProtocols().split(","));
+      sslContext.getDefaultSSLParameters().setProtocols(sslOptions.getEnabledProtocols().split(","));
 
       return sslContext.getSocketFactory();
     } catch (IOException | GeneralSecurityException e) {
@@ -82,8 +81,9 @@ public class SslVerification {
     return trustManagers;
   }
 
-  private KeyManager[] getKeyManagers(final KeyStore trustStore, SslOptions sslOptions)
-      throws GeneralSecurityException, IOException {
+  private KeyManager[] getKeyManagers(final KeyStore trustStore, SslOptions sslOptions) throws
+      GeneralSecurityException,
+      IOException {
 
     if (sslOptions.getTrustStoreFile() != null && !sslOptions.getTrustStoreFile().isEmpty()) {
       try (InputStream is = new FileInputStream(sslOptions.getTrustStoreFile())) {

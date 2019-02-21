@@ -18,6 +18,7 @@ package com.streamsets.datacollector.credential.thycotic.api;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -43,11 +44,12 @@ public class AuthRenewalTask {
   private CloseableHttpClient httpclient;
 
   public AuthRenewalTask() {
-    
+
   }
 
-  public AuthRenewalTask(CloseableHttpClient httpclient, String secretServerUrl, String username,
-      String password) {
+  public AuthRenewalTask(
+      CloseableHttpClient httpclient, String secretServerUrl, String username, String password
+  ) {
     this.secretServerUrl = secretServerUrl;
     this.username = username;
     this.password = password;
@@ -64,7 +66,6 @@ public class AuthRenewalTask {
    * <p>
    * There are 2 expire checks to make sure that not more than one thread updates the token in case
    * of expiration
-   * 
    */
   public String getAccessToken() {
     if (System.currentTimeMillis() > getExpireTime()) {

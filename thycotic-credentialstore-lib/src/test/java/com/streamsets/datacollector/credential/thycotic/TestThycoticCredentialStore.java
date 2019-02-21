@@ -46,8 +46,7 @@ public class TestThycoticCredentialStore {
 
     CredentialStore.Context context = Mockito.mock(CredentialStore.Context.class);
     Mockito.when(context.getConfig(ThycoticCredentialStore.CACHE_EXPIRATION_PROP)).thenReturn("-1");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.CREDENTIAL_REFRESH_PROP))
-        .thenReturn("-2");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.CREDENTIAL_REFRESH_PROP)).thenReturn("-2");
     Mockito.when(context.getConfig(ThycoticCredentialStore.CREDENTIAL_RETRY_PROP)).thenReturn("-3");
 
     store.init(context);
@@ -64,15 +63,11 @@ public class TestThycoticCredentialStore {
 
     CredentialStore.Context context = Mockito.mock(CredentialStore.Context.class);
     Mockito.when(context.getConfig(ThycoticCredentialStore.CACHE_EXPIRATION_PROP)).thenReturn("1");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.CREDENTIAL_REFRESH_PROP))
-        .thenReturn("2");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.CREDENTIAL_REFRESH_PROP)).thenReturn("2");
     Mockito.when(context.getConfig(ThycoticCredentialStore.CREDENTIAL_RETRY_PROP)).thenReturn("3");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL))
-        .thenReturn("h");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME))
-        .thenReturn("u");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD))
-        .thenReturn("p");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL)).thenReturn("h");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME)).thenReturn("u");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD)).thenReturn("p");
     Mockito.doReturn(true).when(store).checkSecretServerConnection();
 
     store.init(context);
@@ -96,17 +91,19 @@ public class TestThycoticCredentialStore {
     Mockito.when(auth.getAccessToken()).thenReturn("t");
 
     GetThycoticSecrets secret = Mockito.mock(GetThycoticSecrets.class);
-    Mockito.when(secret.getSecretField((Mockito.eq(closeableHttpClient)), Mockito.eq("t"),
-        Mockito.eq("h"), Mockito.eq(1), Mockito.eq("n"), Mockito.eq("g"))).thenReturn("secret");
+    Mockito.when(secret.getSecretField((Mockito.eq(closeableHttpClient)),
+        Mockito.eq("t"),
+        Mockito.eq("h"),
+        Mockito.eq(1),
+        Mockito.eq("n"),
+        Mockito.eq("g")
+    )).thenReturn("secret");
     Mockito.doReturn(secret).when(store).getSecret();
 
     CredentialStore.Context context = Mockito.mock(CredentialStore.Context.class);
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL))
-        .thenReturn("h");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME))
-        .thenReturn("a");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD))
-        .thenReturn("s");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL)).thenReturn("h");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME)).thenReturn("a");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD)).thenReturn("s");
     Mockito.doReturn(true).when(store).checkSecretServerConnection();
     store.init(context);
 
@@ -130,20 +127,21 @@ public class TestThycoticCredentialStore {
     Mockito.when(auth.getAccessToken()).thenReturn("t");
 
     GetThycoticSecrets secret = Mockito.mock(GetThycoticSecrets.class);
-    Mockito.when(secret.getSecretField((Mockito.eq(closeableHttpClient)), Mockito.eq("t"),
-        Mockito.eq("h"), Mockito.eq(1), Mockito.eq("n"), Mockito.eq("g"))).thenReturn("secret");
+    Mockito.when(secret.getSecretField((Mockito.eq(closeableHttpClient)),
+        Mockito.eq("t"),
+        Mockito.eq("h"),
+        Mockito.eq(1),
+        Mockito.eq("n"),
+        Mockito.eq("g")
+    )).thenReturn("secret");
     Mockito.doReturn(secret).when(store).getSecret();
 
     CredentialStore.Context context = Mockito.mock(CredentialStore.Context.class);
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL))
-        .thenReturn("h");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME))
-        .thenReturn("u");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD))
-        .thenReturn("p");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL)).thenReturn("h");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME)).thenReturn("u");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD)).thenReturn("p");
 
-    Mockito.when(context.getConfig(Mockito.eq(ThycoticCredentialStore.CACHE_EXPIRATION_PROP)))
-        .thenReturn("200");
+    Mockito.when(context.getConfig(Mockito.eq(ThycoticCredentialStore.CACHE_EXPIRATION_PROP))).thenReturn("200");
     Mockito.doReturn(true).when(store).checkSecretServerConnection();
 
     Assert.assertTrue(store.init(context).isEmpty());
@@ -163,20 +161,16 @@ public class TestThycoticCredentialStore {
     store = Mockito.spy(store);
 
     CredentialStore.Context context = Mockito.mock(CredentialStore.Context.class);
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL))
-        .thenReturn("h");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME))
-        .thenReturn("u");
-    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD))
-        .thenReturn("p");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_URL)).thenReturn("h");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_USERNAME)).thenReturn("u");
+    Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD)).thenReturn("p");
     Mockito.doReturn(true).when(store).checkSecretServerConnection();
 
     Assert.assertTrue(store.init(context).isEmpty());
 
     CredentialValue c = store.get("g", "1-n", "refresh=1,retry=2");
     Assert.assertNotNull(c);
-    ThycoticCredentialStore.ThycoticCredentialValue cc =
-        (ThycoticCredentialStore.ThycoticCredentialValue) c;
+    ThycoticCredentialStore.ThycoticCredentialValue cc = (ThycoticCredentialStore.ThycoticCredentialValue) c;
     Assert.assertEquals(1L, cc.getRefreshSeconds());
     Assert.assertEquals(2L, cc.getRetrySeconds());
 
@@ -190,9 +184,9 @@ public class TestThycoticCredentialStore {
     Mockito.doReturn(Mockito.mock(CredentialStore.Context.class)).when(store).getContext();
 
     String encoded = store.encode("g", "n", "o");
-    Assert.assertArrayEquals(new String[] {"g", "n", "o"}, store.decode(encoded));
+    Assert.assertArrayEquals(new String[]{"g", "n", "o"}, store.decode(encoded));
     encoded = store.encode("g", "n", "");
-    Assert.assertArrayEquals(new String[] {"g", "n", ""}, store.decode(encoded));
+    Assert.assertArrayEquals(new String[]{"g", "n", ""}, store.decode(encoded));
   }
 
   @Test
@@ -201,10 +195,14 @@ public class TestThycoticCredentialStore {
     store = Mockito.spy(store);
     Mockito.doReturn(Mockito.mock(CredentialStore.Context.class)).when(store).getContext();
 
-    Assert.assertEquals("g" + ThycoticCredentialStore.DELIMITER_FOR_CACHE_KEY + "n"
-        + ThycoticCredentialStore.DELIMITER_FOR_CACHE_KEY + "o", store.encode("g", "n", "o"));
-    Assert.assertArrayEquals(new String[] {"g", "n", "o"},
-        store.decode("g" + ThycoticCredentialStore.DELIMITER_FOR_CACHE_KEY + "n"
-            + ThycoticCredentialStore.DELIMITER_FOR_CACHE_KEY + "o"));
+    Assert.assertEquals(
+        "g" + ThycoticCredentialStore.DELIMITER_FOR_CACHE_KEY + "n" + ThycoticCredentialStore.DELIMITER_FOR_CACHE_KEY
+            + "o",
+        store.encode("g", "n", "o")
+    );
+    Assert.assertArrayEquals(new String[]{"g", "n", "o"},
+        store.decode("g" + ThycoticCredentialStore.DELIMITER_FOR_CACHE_KEY + "n" + ThycoticCredentialStore
+            .DELIMITER_FOR_CACHE_KEY + "o")
+    );
   }
 }

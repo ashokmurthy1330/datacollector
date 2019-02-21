@@ -29,10 +29,15 @@ public class GetThycoticSecrets {
 
   private static final Logger LOG = LoggerFactory.getLogger(GetThycoticSecrets.class);
 
-  public String getSecretField(CloseableHttpClient httpclient, String token, String secretServerUrl,
-      Integer secretId, String secretField, String group) {
-    secretServerUrl =
-        Joiner.on("").join(secretServerUrl, "/api/v1/secrets/", secretId, "/fields/", secretField);
+  public String getSecretField(
+      CloseableHttpClient httpclient,
+      String token,
+      String secretServerUrl,
+      Integer secretId,
+      String secretField,
+      String group
+  ) {
+    secretServerUrl = Joiner.on("").join(secretServerUrl, "/api/v1/secrets/", secretId, "/fields/", secretField);
     LOG.debug("Thycotic Secret Server URL: ", secretServerUrl);
     String returnedSecret;
     try {
@@ -50,8 +55,9 @@ public class GetThycoticSecrets {
   }
 
   @VisibleForTesting
-  protected String getValue(CloseableHttpClient httpclient, String secretServerUrl,
-      String token) throws Exception {
+  protected String getValue(
+      CloseableHttpClient httpclient, String secretServerUrl, String token
+  ) throws Exception {
 
     HttpGet httpGet = new HttpGet(secretServerUrl);
     httpGet.setHeader("Authorization", "Bearer " + token);

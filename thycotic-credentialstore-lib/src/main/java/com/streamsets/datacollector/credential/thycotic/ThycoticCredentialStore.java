@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -51,9 +52,7 @@ import com.streamsets.pipeline.api.credential.CredentialValue;
 import com.streamsets.pipeline.api.impl.Utils;
 
 /**
- * 
  * Credential store backed by Thycotic Secret Server
- * 
  */
 @CredentialStoreDef(label = "Thycotic Secret Server")
 public class ThycoticCredentialStore implements CredentialStore {
@@ -141,20 +140,23 @@ public class ThycoticCredentialStore implements CredentialStore {
 
       cacheExpirationSeconds = configuration.get(CACHE_EXPIRATION_PROP, CACHE_EXPIRATION_DEFAULT);
 
-      credentialCache =
-          CacheBuilder.newBuilder().expireAfterAccess(getCacheExpirationSeconds(), TimeUnit.SECONDS)
-              .build(new CacheLoader<String, CredentialValue>() {
-                @Override
-                public CredentialValue load(String key) throws Exception {
-                  return ThycoticCredentialStore.this.createCredentialValue(key);
-                }
-              });
+      credentialCache = CacheBuilder.newBuilder()
+          .expireAfterAccess(getCacheExpirationSeconds(), TimeUnit.SECONDS)
+          .build(new CacheLoader<String, CredentialValue>() {
+            @Override
+            public CredentialValue load(String key) throws Exception {
+              return ThycoticCredentialStore.this.createCredentialValue(key);
+            }
+          });
 
       credentialRefresh = configuration.get(CREDENTIAL_REFRESH_PROP, CREDENTIAL_REFRESH_DEFAULT);
       credentialRetry = configuration.get(CREDENTIAL_RETRY_PROP, CREDENTIAL_RETRY_DEFAULT);
 
-      LOG.debug("Store '{}' credential refresh '{}'ms, retry '{}'ms", context.getId(),
-          getCredentialRefreshSeconds(), getCredentialRetrySeconds());
+      LOG.debug("Store '{}' credential refresh '{}'ms, retry '{}'ms",
+          context.getId(),
+          getCredentialRefreshSeconds(),
+          getCredentialRetrySeconds()
+      );
 
     }
     return issues;
@@ -185,24 +187,25 @@ public class ThycoticCredentialStore implements CredentialStore {
   }
 
   protected ThycoticConfiguration getConfig(Configuration configuration) {
-    return ThycoticConfigurationBuilder.newThycoticConfiguration()
-        .withAddress(configuration.get(THYCOTIC_SECRET_SERVER_URL,
-            ThycoticConfigurationBuilder.DEFAULT_ADDRESS))
-        .withOpenTimeout(configuration.get(OPEN_TIMEOUT, 0))
-        .withReadTimeout(configuration.get(READ_TIMEOUT, 0))
-        .withSslOptions((SslOptionsBuilder.newSslOptions()
-            .withEnabledProtocols(
-                configuration.get(SSL_ENABLED_PROTOCOLS, SslOptionsBuilder.DEFAULT_PROTOCOLS))
-            .withTrustStoreFile(configuration.get(SSL_TRUSTSTORE_FILE, ""))
-            .withTrustStorePassword(configuration.get(SSL_TRUSTSTORE_PASSWORD, ""))
-            .withSslVerify(configuration.get(SSL_VERIFY, true))
-            .withSslTimeout(configuration.get(SSL_TIMEOUT, 0)).build()))
-        .withTimeout(configuration.get(TIMEOUT, 0)).build();
+    return ThycoticConfigurationBuilder.newThycoticConfiguration().withAddress(configuration.get
+        (THYCOTIC_SECRET_SERVER_URL,
+        ThycoticConfigurationBuilder.DEFAULT_ADDRESS
+    )).withOpenTimeout(configuration.get(
+        OPEN_TIMEOUT,
+        0
+    )).withReadTimeout(configuration.get(READ_TIMEOUT, 0)).withSslOptions((
+        SslOptionsBuilder.newSslOptions().withEnabledProtocols(configuration.get(
+            SSL_ENABLED_PROTOCOLS,
+            SslOptionsBuilder.DEFAULT_PROTOCOLS
+        )).withTrustStoreFile(configuration.get(SSL_TRUSTSTORE_FILE, "")).withTrustStorePassword(configuration.get(
+            SSL_TRUSTSTORE_PASSWORD,
+            ""
+        )).withSslVerify(configuration.get(SSL_VERIFY, true)).withSslTimeout(configuration.get(SSL_TIMEOUT, 0)).build()
+    )).withTimeout(configuration.get(TIMEOUT, 0)).build();
 
   }
 
-  public CredentialValue get(String group, String name, String credentialStoreOptions)
-      throws StageException {
+  public CredentialValue get(String group, String name, String credentialStoreOptions) throws StageException {
     try {
       return getCredentialCache().get(encode(group, name, credentialStoreOptions));
     } catch (ExecutionException ex) {
@@ -282,22 +285,25 @@ public class ThycoticCredentialStore implements CredentialStore {
       group = params[0];
       name = params[1];
 
-      String[] splits =
-          name.split(configuration.get(FIELD_KEY_SEPARATOR_PROP, FIELD_KEY_SEPARATOR_DEFAULT));
+      String[] splits = name.split(configuration.get(FIELD_KEY_SEPARATOR_PROP, FIELD_KEY_SEPARATOR_DEFAULT));
       Preconditions.checkArgument(splits.length == 2,
-          Utils.format("Store '{}' invalid value '{}'", getContext().getId(), name));
+          Utils.format("Store '{}' invalid value '{}'", getContext().getId(), name)
+      );
       secretId = Integer.valueOf(splits[0]);
       secretField = splits[1];
 
-      options = Splitter.on(",").omitEmptyStrings().trimResults().withKeyValueSeparator("=")
-          .split(params[2]);
+      options = Splitter.on(",").omitEmptyStrings().trimResults().withKeyValueSeparator("=").split(params[2]);
 
       if (options.containsKey(REFRESH_OPTION)) {
         try {
           refreshSeconds = Long.parseLong(options.get(REFRESH_OPTION));
         } catch (Exception ex) {
           LOG.warn("Store '{}' credential '{}' invalid option '{}' value '{}'",
-              getContext().getId(), name, REFRESH_OPTION, options.get(REFRESH_OPTION));
+              getContext().getId(),
+              name,
+              REFRESH_OPTION,
+              options.get(REFRESH_OPTION)
+          );
         }
       }
       if (options.containsKey(RETRY_OPTION)) {
@@ -305,7 +311,11 @@ public class ThycoticCredentialStore implements CredentialStore {
           retrySeconds = Long.parseLong(options.get(RETRY_OPTION));
         } catch (Exception ex) {
           LOG.warn("Store '{}' credential '{}' invalid option '{}' value '{}'",
-              getContext().getId(), name, RETRY_OPTION, options.get(RETRY_OPTION));
+              getContext().getId(),
+              name,
+              RETRY_OPTION,
+              options.get(RETRY_OPTION)
+          );
         }
       }
     }
@@ -325,14 +335,18 @@ public class ThycoticCredentialStore implements CredentialStore {
       if (now - lastFetch > currentInterval) {
         try {
           LOG.debug("Store '{}' credential '{}' fetching value", getContext().getId(), name);
-          secret = getSecret().getSecretField(getClient(), getAuth().getAccessToken(),
-              secretServerUrl, secretId, secretField, group);
+          secret = getSecret().getSecretField(getClient(),
+              getAuth().getAccessToken(),
+              secretServerUrl,
+              secretId,
+              secretField,
+              group
+          );
           lastFetch = now();
           currentInterval = getRefreshSeconds();
           throwException = false;
         } catch (Exception ex) {
-          LOG.warn("Store '{}' credential '{}' error fetching value: {}", getContext().getId(),
-              name, ex);
+          LOG.warn("Store '{}' credential '{}' error fetching value: {}", getContext().getId(), name, ex);
           lastFetch = now();
           currentInterval = getRetrySeconds();
           throwException = true;
@@ -357,8 +371,7 @@ public class ThycoticCredentialStore implements CredentialStore {
 
   protected String[] decode(String str) {
     List<String> splits = Splitter.on(DELIMITER_FOR_CACHE_KEY).splitToList(str);
-    Preconditions.checkArgument(splits.size() == 3,
-        Utils.format("Store '{}' invalid value '{}'", str));
+    Preconditions.checkArgument(splits.size() == 3, Utils.format("Store '{}' invalid value '{}'", str));
     return splits.toArray(new String[3]);
   }
 

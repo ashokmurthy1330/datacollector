@@ -23,8 +23,9 @@ public class SslOptions {
   private final boolean sslVerify;
   private final int sslTimeout;
 
-  public SslOptions(String enabledProtocols, String trustStoreFile, String trustStorePassword,
-      boolean sslVerify, int sslTimeout) {
+  public SslOptions(
+      String enabledProtocols, String trustStoreFile, String trustStorePassword, boolean sslVerify, int sslTimeout
+  ) {
     this.enabledProtocols = enabledProtocols;
     this.trustStoreFile = trustStoreFile;
     this.trustStorePassword = trustStorePassword;

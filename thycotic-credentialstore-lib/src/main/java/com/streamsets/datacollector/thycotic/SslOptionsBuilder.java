@@ -25,7 +25,8 @@ public final class SslOptionsBuilder {
   private boolean sslVerify = true;
   private int sslTimeout = 0;
 
-  private SslOptionsBuilder() {}
+  private SslOptionsBuilder() {
+  }
 
   public static SslOptionsBuilder newSslOptions() {
     return new SslOptionsBuilder();
@@ -57,7 +58,6 @@ public final class SslOptionsBuilder {
   }
 
   public SslOptions build() {
-    return new SslOptions(enabledProtocols, trustStoreFile, trustStorePassword, sslVerify,
-        sslTimeout);
+    return new SslOptions(enabledProtocols, trustStoreFile, trustStorePassword, sslVerify, sslTimeout);
   }
 }

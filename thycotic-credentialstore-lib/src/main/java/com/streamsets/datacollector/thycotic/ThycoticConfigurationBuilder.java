@@ -38,8 +38,10 @@ public class ThycoticConfigurationBuilder {
 
   public ThycoticConfigurationBuilder fromVaultConfiguration(ThycoticConfiguration conf) {
     return new ThycoticConfigurationBuilder().withAddress(conf.getAddress())
-        .withOpenTimeout(conf.getOpenTimeout()).withReadTimeout(conf.getReadTimeout())
-        .withSslOptions(conf.getSslOptions()).withTimeout(conf.getTimeout());
+        .withOpenTimeout(conf.getOpenTimeout())
+        .withReadTimeout(conf.getReadTimeout())
+        .withSslOptions(conf.getSslOptions())
+        .withTimeout(conf.getTimeout());
   }
 
   public ThycoticConfigurationBuilder withAddress(String address) {

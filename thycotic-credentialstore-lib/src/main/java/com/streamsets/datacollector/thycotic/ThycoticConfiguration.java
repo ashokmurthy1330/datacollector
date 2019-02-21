@@ -26,8 +26,9 @@ public class ThycoticConfiguration {
   private final SslOptions sslOptions;
   private final int timeout;
 
-  public ThycoticConfiguration(String address, int openTimeout, int readTimeout,
-      SslOptions sslOptions, int timeout) {
+  public ThycoticConfiguration(
+      String address, int openTimeout, int readTimeout, SslOptions sslOptions, int timeout
+  ) {
     this.address = address;
     this.openTimeout = openTimeout;
     this.readTimeout = readTimeout;
