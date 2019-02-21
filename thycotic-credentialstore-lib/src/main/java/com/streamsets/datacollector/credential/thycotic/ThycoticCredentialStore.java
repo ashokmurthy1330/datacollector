@@ -16,13 +16,19 @@
 
 package com.streamsets.datacollector.credential.thycotic;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.annotations.VisibleForTesting;
@@ -54,6 +60,7 @@ public class ThycoticCredentialStore implements CredentialStore {
   private static final Logger LOG = LoggerFactory.getLogger(ThycoticCredentialStore.class);
 
   @VisibleForTesting
+  private static final String GRANT_TYPE = "password";
   protected static final String DELIMITER_FOR_CACHE_KEY = "\n";
   public static final String FIELD_KEY_SEPARATOR_PROP = "nameSeparator";
   public static final String FIELD_KEY_SEPARATOR_DEFAULT = "-";
@@ -125,6 +132,10 @@ public class ThycoticCredentialStore implements CredentialStore {
       issues.add(context.createConfigIssue(Errors.THYCOTIC_00, THYCOTIC_SECRET_SERVER_PASSWORD));
     }
 
+    if (!checkSecretServerConnection()) {
+      issues.add(context.createConfigIssue(Errors.THYCOTIC_02, THYCOTIC_SECRET_SERVER_URL));
+    }
+
     if (issues.isEmpty()) {
       authRenewal = new AuthRenewalTask(getClient(), secretServerUrl, username, password);
 
@@ -147,6 +158,25 @@ public class ThycoticCredentialStore implements CredentialStore {
 
     }
     return issues;
+  }
+
+  @VisibleForTesting
+  protected boolean checkSecretServerConnection() {
+    HttpPost httpPost = new HttpPost(secretServerUrl + "/oauth2/token");
+    List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+    nvps.add(new BasicNameValuePair("username", username));
+    nvps.add(new BasicNameValuePair("password", password));
+    nvps.add(new BasicNameValuePair("grant_type", GRANT_TYPE));
+    try {
+      httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+      CloseableHttpResponse response = getClient().execute(httpPost);
+      if (response.getStatusLine().getStatusCode() == 200) {
+        return true;
+      }
+    } catch (IOException e) {
+      LOG.debug("Error in connecting to the secret server: ", e);
+    }
+    return false;
   }
 
   @VisibleForTesting
@@ -254,6 +284,8 @@ public class ThycoticCredentialStore implements CredentialStore {
 
       String[] splits =
           name.split(configuration.get(FIELD_KEY_SEPARATOR_PROP, FIELD_KEY_SEPARATOR_DEFAULT));
+      Preconditions.checkArgument(splits.length == 2,
+          Utils.format("Store '{}' invalid value '{}'", getContext().getId(), name));
       secretId = Integer.valueOf(splits[0]);
       secretField = splits[1];
 
@@ -304,11 +336,6 @@ public class ThycoticCredentialStore implements CredentialStore {
           lastFetch = now();
           currentInterval = getRetrySeconds();
           throwException = true;
-          try {
-            throw ex;
-          } catch (Exception e) {
-            LOG.debug("Exception caught: " + e);
-          }
         }
       } else if (throwException) {
         throw new StageException(Errors.THYCOTIC_01, name, credentialRetry);

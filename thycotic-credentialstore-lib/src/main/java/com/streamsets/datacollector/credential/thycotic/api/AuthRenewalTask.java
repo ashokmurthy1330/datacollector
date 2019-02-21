@@ -29,6 +29,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.annotations.VisibleForTesting;
 
 public class AuthRenewalTask {
 
@@ -40,6 +41,10 @@ public class AuthRenewalTask {
   private String username;
   private String password;
   private CloseableHttpClient httpclient;
+
+  public AuthRenewalTask() {
+    
+  }
 
   public AuthRenewalTask(CloseableHttpClient httpclient, String secretServerUrl, String username,
       String password) {
@@ -62,10 +67,10 @@ public class AuthRenewalTask {
    * 
    */
   public String getAccessToken() {
-    if (System.currentTimeMillis() > expires) {
+    if (System.currentTimeMillis() > getExpireTime()) {
       try {
         synchronized (this) {
-          if (System.currentTimeMillis() > expires) {
+          if (System.currentTimeMillis() > getExpireTime()) {
             accessToken = fetchAccessToken();
             if (accessToken != null && !accessToken.isEmpty()) {
               expires = (System.currentTimeMillis() + expires);
@@ -79,7 +84,8 @@ public class AuthRenewalTask {
     return accessToken;
   }
 
-  private String fetchAccessToken() throws Exception {
+  @VisibleForTesting
+  protected String fetchAccessToken() throws Exception {
     HttpPost httpPost = new HttpPost(secretServerUrl + "/oauth2/token");
     List<NameValuePair> nvps = new ArrayList<NameValuePair>();
     nvps.add(new BasicNameValuePair("username", username));
@@ -109,5 +115,10 @@ public class AuthRenewalTask {
       response2.close();
     }
     return null;
+  }
+
+  @VisibleForTesting
+  public long getExpireTime() {
+    return expires;
   }
 }

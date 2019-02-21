@@ -36,7 +36,7 @@ public class TestThycoticCredentialStore {
 
     store.init(context);
     Mockito.when(context.getConfig(Mockito.any())).thenReturn(null);
-    Assert.assertEquals(3, store.init(context).size());
+    Assert.assertEquals(4, store.init(context).size());
   }
 
   @Test
@@ -73,6 +73,7 @@ public class TestThycoticCredentialStore {
         .thenReturn("u");
     Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD))
         .thenReturn("p");
+    Mockito.doReturn(true).when(store).checkSecretServerConnection();
 
     store.init(context);
     Assert.assertEquals(1L, store.getCacheExpirationSeconds());
@@ -106,6 +107,7 @@ public class TestThycoticCredentialStore {
         .thenReturn("a");
     Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD))
         .thenReturn("s");
+    Mockito.doReturn(true).when(store).checkSecretServerConnection();
     store.init(context);
 
     CredentialValue credential = store.get("g", "1-n", "");
@@ -142,6 +144,7 @@ public class TestThycoticCredentialStore {
 
     Mockito.when(context.getConfig(Mockito.eq(ThycoticCredentialStore.CACHE_EXPIRATION_PROP)))
         .thenReturn("200");
+    Mockito.doReturn(true).when(store).checkSecretServerConnection();
 
     Assert.assertTrue(store.init(context).isEmpty());
     CredentialValue credential1 = store.get("g", "1-n", "");
@@ -166,6 +169,7 @@ public class TestThycoticCredentialStore {
         .thenReturn("u");
     Mockito.when(context.getConfig(ThycoticCredentialStore.THYCOTIC_SECRET_SERVER_PASSWORD))
         .thenReturn("p");
+    Mockito.doReturn(true).when(store).checkSecretServerConnection();
 
     Assert.assertTrue(store.init(context).isEmpty());
 

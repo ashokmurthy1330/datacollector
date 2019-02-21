@@ -20,7 +20,8 @@ import com.streamsets.pipeline.api.ErrorCode;
 
 public enum Errors implements ErrorCode {
   THYCOTIC_00("Missing configuration '{}'"),
-  THYCOTIC_01("Credential '{}' could not be retrieved"),;
+  THYCOTIC_01("Credential '{}' could not be retrieved"),
+  THYCOTIC_02("Couldn't connect to the Thycotic Secret Server '{}'"),;
 
   private final String message;
 

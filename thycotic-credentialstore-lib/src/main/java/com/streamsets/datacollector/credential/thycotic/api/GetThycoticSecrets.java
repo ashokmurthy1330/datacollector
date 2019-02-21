@@ -23,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
+import com.google.common.annotations.VisibleForTesting;
 
 public class GetThycoticSecrets {
 
@@ -31,8 +32,8 @@ public class GetThycoticSecrets {
   public String getSecretField(CloseableHttpClient httpclient, String token, String secretServerUrl,
       Integer secretId, String secretField, String group) {
     secretServerUrl =
-        Joiner.on("+").join(secretServerUrl, "/api/v1/secrets/", secretId, "/fields/", secretField);
-    LOG.debug("Thycotic Secret Server URL: {}", secretServerUrl);
+        Joiner.on("").join(secretServerUrl, "/api/v1/secrets/", secretId, "/fields/", secretField);
+    LOG.debug("Thycotic Secret Server URL: ", secretServerUrl);
     String returnedSecret;
     try {
       returnedSecret = getValue(httpclient, secretServerUrl, token);
@@ -43,12 +44,13 @@ public class GetThycoticSecrets {
         return returnedSecret;
       }
     } catch (Exception e) {
-      LOG.debug("Exception in retrieving the secret value: {}", e);
+      LOG.debug("Exception in retrieving the secret value: ", e);
     }
     return null;
   }
 
-  private static String getValue(CloseableHttpClient httpclient, String secretServerUrl,
+  @VisibleForTesting
+  protected String getValue(CloseableHttpClient httpclient, String secretServerUrl,
       String token) throws Exception {
 
     HttpGet httpGet = new HttpGet(secretServerUrl);
@@ -61,5 +63,4 @@ public class GetThycoticSecrets {
       response2.close();
     }
   }
-
 }
