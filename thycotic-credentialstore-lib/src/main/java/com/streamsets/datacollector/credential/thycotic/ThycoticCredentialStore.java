@@ -187,22 +187,17 @@ public class ThycoticCredentialStore implements CredentialStore {
   }
 
   protected ThycoticConfiguration getConfig(Configuration configuration) {
-    return ThycoticConfigurationBuilder.newThycoticConfiguration().withAddress(configuration.get
-        (THYCOTIC_SECRET_SERVER_URL,
-        ThycoticConfigurationBuilder.DEFAULT_ADDRESS
-    )).withOpenTimeout(configuration.get(
-        OPEN_TIMEOUT,
-        0
-    )).withReadTimeout(configuration.get(READ_TIMEOUT, 0)).withSslOptions((
-        SslOptionsBuilder.newSslOptions().withEnabledProtocols(configuration.get(
-            SSL_ENABLED_PROTOCOLS,
-            SslOptionsBuilder.DEFAULT_PROTOCOLS
-        )).withTrustStoreFile(configuration.get(SSL_TRUSTSTORE_FILE, "")).withTrustStorePassword(configuration.get(
-            SSL_TRUSTSTORE_PASSWORD,
-            ""
-        )).withSslVerify(configuration.get(SSL_VERIFY, true)).withSslTimeout(configuration.get(SSL_TIMEOUT, 0)).build()
-    )).withTimeout(configuration.get(TIMEOUT, 0)).build();
-
+    return ThycoticConfigurationBuilder.newThycoticConfiguration()
+        .withAddress(configuration.get(THYCOTIC_SECRET_SERVER_URL,ThycoticConfigurationBuilder.DEFAULT_ADDRESS))
+        .withOpenTimeout(configuration.get(OPEN_TIMEOUT, 0))
+        .withReadTimeout(configuration.get(READ_TIMEOUT, 0))
+        .withSslOptions((SslOptionsBuilder.newSslOptions()
+            .withEnabledProtocols(configuration.get(SSL_ENABLED_PROTOCOLS, SslOptionsBuilder.DEFAULT_PROTOCOLS))
+            .withTrustStoreFile(configuration.get(SSL_TRUSTSTORE_FILE, ""))
+            .withTrustStorePassword(configuration.get(SSL_TRUSTSTORE_PASSWORD, ""))
+            .withSslVerify(configuration.get(SSL_VERIFY, true))
+            .withSslTimeout(configuration.get(SSL_TIMEOUT, 0)).build()))
+        .withTimeout(configuration.get(TIMEOUT, 0)).build();
   }
 
   public CredentialValue get(String group, String name, String credentialStoreOptions) throws StageException {
